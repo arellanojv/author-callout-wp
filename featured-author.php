@@ -10,12 +10,29 @@
 if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 require_once plugin_dir_path(__FILE__) . 'inc/generateAuthorHTML.php';
+require_once plugin_dir_path(__FILE__) . 'inc/customEeatFields.php';
 
 class FeaturedAuthor
 {
   function __construct()
   {
     add_action('init', [$this, 'onInit']);
+    add_action('rest_api_init', [$this, 'authorHTML']);
+  }
+
+  function authorHTML()
+  {
+    register_rest_route('featuredAuthor/v1', 'getHTML', array(
+      'methods' => WP_REST_SERVER::READABLE,
+      'callback' => [$this, 'getAuthorHTML'],
+      'permission_callback' => '__return_true',
+    ));
+  }
+
+  function getAuthorHTML($data)
+  {
+    $data['userId'];
+    return generateAuthorHTML($data['userId']);
   }
 
   function onInit()

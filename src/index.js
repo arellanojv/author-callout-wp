@@ -1,5 +1,7 @@
 import "./index.scss"
 import {useSelect} from "@wordpress/data"
+import {useState, useEffect} from "react"
+import apiFetch from "@wordpress/api-fetch"
 
 wp.blocks.registerBlockType("ourplugin/featured-author", {
   title: "Author Callout",
@@ -16,6 +18,19 @@ wp.blocks.registerBlockType("ourplugin/featured-author", {
 })
 
 function EditComponent(props) {
+  const [thePreview, setThePreview] = useState("")
+
+  useEffect(() => {
+    async function go() {
+      const response = await apiFetch({
+        path: `featuredAuthor/v1/getHTML?userId=${props.attributes.userId}`,
+        method: "GET"
+      })
+      setThePreview(response)
+    }
+    go()
+  }, [props.attributes.userId])
+
   const allAuthors = useSelect(select => {
     return select("core").getEntityRecords("root", "user", {per_page: -1})
   })
@@ -38,9 +53,7 @@ function EditComponent(props) {
           })}
         </select>
       </div>
-      <div>
-        The HTML preview of the selected author will appear here.
-      </div>
+      <div dangerouslySetInnerHTML={{__html: thePreview}}></div>
     </div>
   )
 }
